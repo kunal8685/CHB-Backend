@@ -17,12 +17,13 @@ public class FileService {
 
     private final UploadedFileRepository repo;
 
-    private final String uploadDir = "uploads"; // root folder
+    // 🔥 FIX: Use absolute path so Tomcat does not break
+    private final String uploadDir = "C:/Users/Austere/Desktop/CHB/chb-backend/uploads";
 
     public UploadedFile upload(Long bookingId, MultipartFile file) throws IOException {
 
         File folder = new File(uploadDir);
-        if (!folder.exists()) folder.mkdirs();
+        if (!folder.exists()) folder.mkdirs(); // create folder if not exists
 
         String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
         File savedFile = new File(folder, fileName);
@@ -31,7 +32,7 @@ public class FileService {
 
         UploadedFile uf = UploadedFile.builder()
                 .bookingId(bookingId)
-                .fileName(file.getOriginalFilename())
+                .fileName(fileName)
                 .filePath(savedFile.getAbsolutePath())
                 .contentType(file.getContentType())
                 .fileSize(file.getSize())
