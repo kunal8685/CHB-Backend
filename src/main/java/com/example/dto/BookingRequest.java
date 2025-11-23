@@ -1,28 +1,14 @@
 package com.example.dto;
-
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.Data;
-
-@Data
+import lombok.*;
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class BookingRequest {
-    @NotNull
     private Long hallId;
-
-    @NotBlank
+    private Long userId;
     private String name;
-
-    @Email
     private String email;
-
-    @NotBlank
     private String mobile;
-
-    // Expecting yyyy-MM-dd
-    @NotBlank
     private String date;
-
-    @NotBlank
     private String timeSlot;
+    private Double amount;
+    private Long ulbId;
 }

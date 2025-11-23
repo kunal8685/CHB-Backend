@@ -5,23 +5,12 @@ import lombok.*;
 
 @Entity
 @Table(name = "booking_files")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class BookingFile {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private Long bookingId;
-
-    private String fileName;
-
-    private String originalName;
-
-    private String fileType;
-
-    private Long fileSize;
+    private String filename;
+    private String url;
+    private String docType; // ID_PROOF, ADDRESS_PROOF, etc.
 }

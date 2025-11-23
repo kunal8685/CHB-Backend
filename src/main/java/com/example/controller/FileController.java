@@ -1,34 +1,52 @@
 package com.example.controller;
 
-import java.util.List;
-
+import com.example.entity.BookingFile;
+import com.example.repository.BookingFileRepository;
+import com.example.service.FileService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.*;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.entity.UploadedFile;
-import com.example.service.FileService;
+import java.nio.file.*;
 
-import lombok.RequiredArgsConstructor;
-
-@RestController
-@RequestMapping("/api/bookings")
+@RestController @RequestMapping("/api/files")
 @RequiredArgsConstructor
 public class FileController {
-
     private final FileService fileService;
+    private final BookingFileRepository bookingFileRepo;
 
-    // Upload document
-    @PostMapping("/{bookingId}/upload")
-    public UploadedFile uploadDocument(
-            @PathVariable Long bookingId,
-            @RequestParam("file") MultipartFile file
-    ) throws Exception {
-        return fileService.upload(bookingId, file);
+    @PostMapping("/upload/booking/{bookingId}")
+    public ResponseEntity<?> uploadForBooking(@PathVariable Long bookingId,
+                                              @RequestParam("file") MultipartFile file,
+                                              @RequestParam(value="docType", required=false) String docType) {
+        try {
+            BookingFile bf = fileService.storeForBooking(bookingId, file, docType);
+            return ResponseEntity.ok(bf);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Upload failed");
+        }
     }
 
-    // Get all documents for a booking
-    @GetMapping("/{bookingId}/documents")
-    public List<UploadedFile> getDocuments(@PathVariable Long bookingId) {
-        return fileService.getFiles(bookingId);
+    @GetMapping("/booking/{bookingId}")
+    public ResponseEntity<?> listFiles(@PathVariable Long bookingId) {
+        return ResponseEntity.ok(bookingFileRepo.findByBookingId(bookingId));
+    }
+
+    @GetMapping("/download/{filename:.+}")
+    public ResponseEntity<Resource> download(@PathVariable String filename) {
+        try {
+            Path filePath = Paths.get("uploads").resolve(filename).normalize();
+            Resource resource = new UrlResource(filePath.toUri());
+            if (!resource.exists()) return ResponseEntity.notFound().build();
+            String contentType = Files.probeContentType(filePath);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType==null?"application/octet-stream":contentType))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                    .body(resource);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
     }
 }

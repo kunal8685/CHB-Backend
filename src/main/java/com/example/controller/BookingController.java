@@ -1,58 +1,41 @@
 package com.example.controller;
 
-
-
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.example.dto.BookingRequest;
-import com.example.dto.BookingResponse;
 import com.example.entity.Booking;
 import com.example.service.BookingService;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-@RestController
-@RequestMapping("/api")
+import java.util.List;
+
+@RestController @RequestMapping("/api/bookings")
 @RequiredArgsConstructor
 public class BookingController {
-
     private final BookingService bookingService;
 
-    @PostMapping("/bookings")
-    public ResponseEntity<?> createBooking(@Validated @RequestBody BookingRequest req) {
-        try {
-            Booking b = bookingService.createBooking(req);
-            return ResponseEntity.status(HttpStatus.CREATED).body(toDto(b));
-        } catch (IllegalStateException ex) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(ex.getMessage()));
-        }
+    @PostMapping
+    public ResponseEntity<?> create(@RequestBody BookingRequest req) {
+        Booking b = new Booking();
+        b.setHallId(req.getHallId());
+        b.setUserId(req.getUserId());
+        b.setName(req.getName()); b.setEmail(req.getEmail()); b.setMobile(req.getMobile());
+        if (req.getDate()!=null) b.setDate(java.time.LocalDate.parse(req.getDate()));
+        b.setTimeSlot(req.getTimeSlot()); b.setAmount(req.getAmount());
+        b.setUlbId(req.getUlbId());
+        Booking saved = bookingService.create(b);
+        return ResponseEntity.ok(saved);
     }
 
-    @GetMapping("/bookings")
-    public List<BookingResponse> listAll() {
-        return bookingService.listAll().stream().map(this::toDto).collect(Collectors.toList());
+    @GetMapping
+    public ResponseEntity<List<Booking>> listAll() { return ResponseEntity.ok(bookingService.listAll()); }
+
+    @GetMapping("/hall/{hallId}")
+    public ResponseEntity<List<Booking>> byHall(@PathVariable Long hallId, @RequestParam(required=false) String date) {
+        if (date==null) return ResponseEntity.ok(bookingService.listAll().stream().filter(b->b.getHallId().equals(hallId)).toList());
+        return ResponseEntity.ok(bookingService.listByHallAndDate(hallId, date));
     }
 
-    @GetMapping("/bookings/hall/{hallId}")
-    public List<BookingResponse> listForHall(@PathVariable Long hallId) {
-        return bookingService.listByHall(hallId).stream().map(this::toDto).collect(Collectors.toList());
-    }
-
-    private BookingResponse toDto(Booking b) {
-        return new BookingResponse(b.getId(), b.getHallId(), b.getName(), b.getEmail(), b.getMobile(), b.getDate(), b.getTimeSlot(), b.getStatus());
-    }
-
-    // simple error wrapper
-    record ErrorResponse(String message) {}
+    @GetMapping("/{id}")
+    public ResponseEntity<Booking> get(@PathVariable Long id) { return ResponseEntity.ok(bookingService.getById(id)); }
 }

@@ -1,9 +1,13 @@
 package com.example.dto;
 
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class AuthRequest {
-    private String email;
+    // MUST be "username" and "password" to match backend login JSON
+    private String username;
     private String password;
 }

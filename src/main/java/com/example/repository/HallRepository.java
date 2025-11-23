@@ -1,11 +1,7 @@
 package com.example.repository;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import com.example.entity.Hall;
-
-@Repository
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
 public interface HallRepository extends JpaRepository<Hall, Long> {
-
+    List<Hall> findByUlbId(Long ulbId);
 }

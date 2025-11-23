@@ -1,39 +1,32 @@
 package com.example.controller;
 
-
-
-import java.util.List;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.example.entity.Booking;
+import com.example.entity.BookingStatus;
 import com.example.service.BookingService;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-@RestController
-@RequestMapping("/api/admin")
+@RestController @RequestMapping("/api/admin")
 @RequiredArgsConstructor
 public class AdminController {
-
     private final BookingService bookingService;
 
-    @GetMapping("/bookings")
-    public List<Booking> all() {
-        return bookingService.listAll();
-    }
-
     @PutMapping("/bookings/{id}/approve")
-    public Booking approve(@PathVariable Long id) {
-        return bookingService.approve(id);
+    public ResponseEntity<?> approve(@PathVariable Long id, @RequestHeader(value="X-User-Id", required=false) Long userId) {
+        Booking b = bookingService.changeStatus(id, BookingStatus.APPROVED, userId, "Approved by admin");
+        return ResponseEntity.ok(b);
     }
 
     @PutMapping("/bookings/{id}/reject")
-    public Booking reject(@PathVariable Long id) {
-        return bookingService.reject(id);
+    public ResponseEntity<?> reject(@PathVariable Long id, @RequestHeader(value="X-User-Id", required=false) Long userId) {
+        Booking b = bookingService.changeStatus(id, BookingStatus.REJECTED, userId, "Rejected by admin");
+        return ResponseEntity.ok(b);
+    }
+
+    @PutMapping("/bookings/{id}/check")
+    public ResponseEntity<?> check(@PathVariable Long id, @RequestHeader(value="X-User-Id", required=false) Long userId) {
+        Booking b = bookingService.changeStatus(id, BookingStatus.CHECKED, userId, "Checked by admin");
+        return ResponseEntity.ok(b);
     }
 }

@@ -1,26 +1,14 @@
 package com.example.entity;
 
-
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.Builder;
-import lombok.Data;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
-@Data
-@Builder
+@Table(name = "uploaded_files")
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class UploadedFile {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private Long bookingId;
-    private String fileName;
-    private String filePath;
-    private String contentType;
-    private long fileSize;
+    private String filename;
+    private String url;
 }
