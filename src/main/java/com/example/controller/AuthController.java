@@ -9,9 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Simple auth controller that supports register and login.
- */
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -20,27 +17,27 @@ public class AuthController {
     private final AuthService authService;
     private final UserRepository userRepository;
 
+    // User registration
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User u) {
-        if (u.getUsername() == null || u.getPassword() == null) {
-            return ResponseEntity.badRequest().body("username and password required");
+        if (u.getEmail() == null || u.getPassword() == null) {
+            return ResponseEntity.badRequest().body("Email and password are required");
         }
-        if (userRepository.findByUsername(u.getUsername()).isPresent()) {
-            return ResponseEntity.status(409).body("Username already exists");
+        if (userRepository.findByEmail(u.getEmail()).isPresent()) {
+            return ResponseEntity.status(409).body("Email already exists");
         }
         User saved = authService.register(u);
-        // Do not return password in response
-        saved.setPassword(null);
+        saved.setPassword(null); // Don't return password in response
         return ResponseEntity.ok(saved);
     }
 
+    // User login
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest req) {
         try {
             AuthResponse resp = authService.login(req);
             return ResponseEntity.ok(resp);
         } catch (RuntimeException ex) {
-            // Return 401 for invalid credentials with message
             return ResponseEntity.status(401).body(ex.getMessage());
         } catch (Exception ex) {
             return ResponseEntity.status(500).body("Login failed");

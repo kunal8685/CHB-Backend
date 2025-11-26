@@ -11,16 +11,18 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.*;
 
-@RestController @RequestMapping("/api/files")
+@RestController
+@RequestMapping("/api/files")
 @RequiredArgsConstructor
 public class FileController {
+
     private final FileService fileService;
     private final BookingFileRepository bookingFileRepo;
 
     @PostMapping("/upload/booking/{bookingId}")
     public ResponseEntity<?> uploadForBooking(@PathVariable Long bookingId,
                                               @RequestParam("file") MultipartFile file,
-                                              @RequestParam(value="docType", required=false) String docType) {
+                                              @RequestParam(value = "docType", required = false) String docType) {
         try {
             BookingFile bf = fileService.storeForBooking(bookingId, file, docType);
             return ResponseEntity.ok(bf);
@@ -42,7 +44,7 @@ public class FileController {
             if (!resource.exists()) return ResponseEntity.notFound().build();
             String contentType = Files.probeContentType(filePath);
             return ResponseEntity.ok()
-                    .contentType(MediaType.parseMediaType(contentType==null?"application/octet-stream":contentType))
+                    .contentType(MediaType.parseMediaType(contentType == null ? "application/octet-stream" : contentType))
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
                     .body(resource);
         } catch (Exception e) {

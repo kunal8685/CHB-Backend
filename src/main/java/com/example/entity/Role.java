@@ -1,2 +1,5 @@
 package com.example.entity;
-public enum Role { ROLE_USER, ROLE_ADMIN }
+//src/main/java/com/example/entity/Role.java
+public enum Role {
+ ROLE_USER, ROLE_ADMIN
+}

@@ -9,21 +9,23 @@ import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
 
-@RestController @RequestMapping("/api/payment")
+@RestController
+@RequestMapping("/api/payment")
 @RequiredArgsConstructor
 public class PaymentController {
+
     private final BookingService bookingService;
 
     @PostMapping("/pay/{bookingId}")
     public ResponseEntity<?> pay(@PathVariable Long bookingId, @RequestParam String paymentRef,
-                                 @RequestHeader(value="X-User-Id", required=false) Long userId) {
+                                 @RequestHeader(value = "X-User-Id", required = false) Long userId) {
         Booking b = bookingService.changeStatus(bookingId, BookingStatus.PAID, userId, "Paid via " + paymentRef);
-        // produce a simple receipt text (could be PDF in future)
+        // Simple receipt text generation
         String receipt = "Receipt\nBookingId: " + b.getId() + "\nAmount: " + b.getAmount() + "\nStatus: " + b.getStatus();
         byte[] bytes = receipt.getBytes(StandardCharsets.UTF_8);
         return ResponseEntity.ok()
                 .contentType(MediaType.TEXT_PLAIN)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=receipt_"+b.getId()+".txt")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=receipt_" + b.getId() + ".txt")
                 .body(bytes);
     }
 }
